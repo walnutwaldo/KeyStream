@@ -2,6 +2,16 @@
   padding: 0 2rem;
 }
 
+
+.welcome{
+  font-size: 10rem;
+  font-weight: 600;
+  margin: 0;
+  color: blue;
+  line-height: 1.15;
+  text-align: center;
+
+}
 .main {
   min-height: 100vh;
   padding: 4rem 0;
@@ -43,6 +53,7 @@
   margin: 0;
   line-height: 1.15;
   font-size: 4rem;
+  color: blue;
 }
 
 .title,

@@ -1,0 +1,33 @@
+.content{
+    display: flex;
+    justify-content: space-between;
+    width: 100vw;
+    padding-top: 2%;
+    padding-bottom: 2%;
+}
+
+.buyer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    padding-left: 2%;
+    position:absolute;
+    left: 67%;
+    padding-right: 2%;
+    color: green
+}
+
+.seller{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    position: absolute;
+    left: 72%;
+    padding-left: 2%;
+    padding-right: 2%;
+    color: yellow
+}

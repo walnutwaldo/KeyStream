@@ -1,8 +1,7 @@
 import type { NextPage } from 'next'
 import Welcome from '../components/Welcome';
-import TronLinkConnect from '../components/TronLinkConnect'
 import Navbar from '../components/Navbar'
-const Home: NextPage = () => {
+const Seller: NextPage = () => {
   return (
       <h1 className="welcome">
         <Navbar />
@@ -11,4 +10,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home
+export default Seller
