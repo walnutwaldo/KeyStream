@@ -13,7 +13,7 @@ const Home: NextPage = () => {
     const [userType, setUserType] = useState<UserType>(UserType.BUYER);
 
     return (
-        <div>
+        <div className={"bg-black text-white"}>
             <Head>
                 <link rel="shortcut icon" href="../static/KeyStream.png"/>
                 <title>KeyStream Dashboard</title>
