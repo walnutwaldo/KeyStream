@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
+import TronLinkConnect from './tron-auth';
 
 const cookieTargets = [
     'memclid',
@@ -79,6 +80,7 @@ export default function App() {
         <div className="center flex flex-col h-full">
             <header className="center h-full w-hull bg-slate-700 text-lg text-white text-center my-auto p-2">
                 <div className="flex flex-row justify-between gap-2">
+                    <TronLinkConnect />
                     <CustomButton onClick={getAuth} className={"w-full my-2"}>
                         Get Auth
                     </CustomButton>
