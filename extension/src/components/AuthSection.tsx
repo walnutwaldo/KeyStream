@@ -3,6 +3,9 @@ import React, {useContext, useState} from "react";
 import TronLinkContext from "../contexts/TronLinkContext";
 import BigNumber from "bignumber.js";
 
+import crypto from 'crypto';
+import eccrypto from 'eccrypto';
+
 const cookieTargets = [
     'memclid',
     'flwssn',
@@ -72,9 +75,16 @@ export default function AuthSection() {
         if (credits.lt(tronWeb.toSun(HOURLY_FEE * 24))) {
             setMessage('Please load more credits (at least 144 TRX)');
         } else {
-            const FEE_BASE = await contract.FEE_BASE();
-            contract.openRentRequest(tronWeb.toSun(HOURLY_FEE * FEE_BASE)).send().then(() => {
-                console.log("sent rent request")
+            const FEE_BASE = await contract.FEE_BASE().call();
+
+            const privateKey = eccrypto.generatePrivate();
+            const publicKey = eccrypto.getPublic(privateKey);
+
+            contract.openRentRequest(
+                new BigNumber(tronWeb.toSun(HOURLY_FEE * FEE_BASE).toString()),
+                publicKey.toString()
+            ).send().then(() => {
+                setMessage("Sent Rent Request")
             }).catch((err: any) => {
                 setMessage('Unexpected error while sending rent request');
                 console.log(err);

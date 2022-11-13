@@ -17,7 +17,7 @@ contract KeyStream is Ownable, ReentrancyGuard {
     using EnumerableSet for EnumerableSet.AddressSet;
     using ECDSA for bytes32;
 
-    uint constant FEE_BASE = 10000;
+    uint public constant FEE_BASE = 10000;
 
     mapping(address => int) private _balance;
 
@@ -79,6 +79,7 @@ contract KeyStream is Ownable, ReentrancyGuard {
         require(amt > 0, "POSITIVE_WITHDRAWAL_REQUIRED");
         require(amt <= int(availableBalance(msg.sender)), "INSUFFICIENT_BALANCE");
         _balance[msg.sender] -= amt;
+        payable(msg.sender).transfer(uint(amt));
     }
 
     // ----------------------------------------
@@ -89,12 +90,12 @@ contract KeyStream is Ownable, ReentrancyGuard {
         return _openRequests.length();
     }
 
-    function getRequest(uint index) public view returns (address) {
+    function getRequest(uint index) public view returns (Request memory) {
         require(index < _openRequests.length(), "INDEX_NOT_IN_RANGE");
-        return _openRequests.at(index);
+        return request[_openRequests.at(index)];
     }
 
-    function nextOpenRequest() public view returns (address) {
+    function nextOpenRequest() public view returns (Request memory) {
         return getRequest(0);
     }
 

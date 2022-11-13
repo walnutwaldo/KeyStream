@@ -10,7 +10,7 @@ export default function App() {
     return (
         <TronProvider>
             <div className="center flex flex-col h-full">
-                <header className="center h-full w-hull bg-slate-700 text-lg text-white text-center my-auto p-2">
+                <header className="center h-full w-hull bg-red-700 text-lg text-white text-center my-auto p-2">
                     <AddressDisplay/>
                     <BalanceDisplay/>
                     <AuthSection/>

@@ -31,17 +31,20 @@ export default function CreditsDisplay() {
 
     return (
         <div className={"flex flex-col justify-center"}>
-            <div className={"bg-white rounded-lg p-2 text-black w-72 mx-auto"}>
+            <div className={"bg-white rounded-lg p-2 text-black w-72 mx-auto flex flex-col"}>
                 <h2 className={"font-semibold"}>
-                    BALANCE TO USE
+                    BALANCE - CREDITS
                 </h2>
                 <span className={"font-mono text-gray-700"}>
-                    Balance: {TronWeb.fromSun(credits.toString()).toString()} TRX
+                    TRX Balance: {TronWeb.fromSun(balance.toString()).toString()}
+                </span>
+                <span className={"font-mono text-gray-700"}>
+                    KeyStream Credits: {TronWeb.fromSun(credits.toString()).toString()} TRX
                 </span>
                 <div className={"grid grid-cols-2 gap-2 my-2"}>
                     <CustomButton onClick={addBalance} disabled={balance.lt(
                         TronWeb.toSun(500)
-                    )}>Add 500 More</CustomButton>
+                    )}>+ 500 Credits</CustomButton>
                     <CustomButton onClick={withdrawBalance}>Withdraw</CustomButton>
                 </div>
             </div>

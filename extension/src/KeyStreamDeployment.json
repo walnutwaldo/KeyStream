@@ -80,6 +80,19 @@
       "stateMutability": "nonpayable"
     },
     {
+      "inputs": [],
+      "name": "FEE_BASE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -170,9 +183,41 @@
       "name": "getRequest",
       "outputs": [
         {
-          "internalType": "address",
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "fee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "borrower",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "pubkey",
+              "type": "bytes"
+            },
+            {
+              "internalType": "address",
+              "name": "seller",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fulfilledAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "encryptedAuth",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct KeyStream.Request",
           "name": "",
-          "type": "address"
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
@@ -221,9 +266,41 @@
       "name": "nextOpenRequest",
       "outputs": [
         {
-          "internalType": "address",
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "fee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "borrower",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "pubkey",
+              "type": "bytes"
+            },
+            {
+              "internalType": "address",
+              "name": "seller",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fulfilledAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "encryptedAuth",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct KeyStream.Request",
           "name": "",
-          "type": "address"
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
@@ -307,5 +384,5 @@
       "type": "function"
     }
   ],
-  "address": "411001646691ddc501583fb3ad7d292482ed947bf3"
+  "address": "419975daec423202c3fb9b5200a27c92ae8b1f2c74"
 }
