@@ -23,7 +23,7 @@ export default function CreditsDisplay() {
 
     function addBalance() {
         contract.deposit().send({
-            callValue: TronWeb.toSun(500)
+            callValue: TronWeb.toSun(250)
         }).then((result: any) => {
 
         });
