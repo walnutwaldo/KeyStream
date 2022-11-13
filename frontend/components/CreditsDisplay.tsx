@@ -43,8 +43,8 @@ export default function CreditsDisplay() {
                 </span>
                 <div className={"grid grid-cols-2 gap-2 my-2"}>
                     <CustomButton onClick={addBalance} disabled={balance.lt(
-                        TronWeb.toSun(500)
-                    )}>+ 500 Credits</CustomButton>
+                        TronWeb.toSun(250)
+                    )}>+ 250 Credits</CustomButton>
                     <CustomButton onClick={withdrawBalance}>Withdraw</CustomButton>
                 </div>
             </div>

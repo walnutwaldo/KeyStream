@@ -128,16 +128,6 @@
     {
       "inputs": [
         {
-          "internalType": "bytes32",
-          "name": "hash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes",
-          "name": "signature",
-          "type": "bytes"
-        },
-        {
           "internalType": "address",
           "name": "borrower",
           "type": "address"
@@ -435,5 +425,5 @@
       "type": "function"
     }
   ],
-  "address": "419190f7585b7b2d1d2cd0d1708aed7ac9da482a53"
+  "address": "416517de8f3bca5ab8695951231e3a550e88b540ff"
 }

@@ -45,7 +45,7 @@ contract KeyStream is Ownable, ReentrancyGuard {
 
     function accumulatedFees(address seller) internal view returns (uint) {
         address borrower = filledRequest[seller];
-        uint fee = request[filledRequest[seller]].fee;
+        uint fee = request[borrower].fee;
         require(fee != 0, "INVALID_BORROWER");
 
         uint dt = block.timestamp - request[borrower].fulfilledAt;
@@ -115,21 +115,25 @@ contract KeyStream is Ownable, ReentrancyGuard {
     // ----------------------------------------
 
     function fulfillRequest(
-        bytes32 hash, // Signature hash from the seller (used in place of msg.sender to allow a server to fulfill requests)
-        bytes memory signature, // Signature
+//        bytes32 hash, // Signature hash from the seller (used in place of msg.sender to allow a server to fulfill requests)
+//        bytes memory signature, // Signature
         address borrower,
         bytes memory encryptedAuth
     ) public nonReentrant {
-        address seller = hash.toEthSignedMessageHash().recover(signature);
-        require(seller != address(0), "INVALID_SIGNATURE");
+//        address seller = hash.toEthSignedMessageHash().recover(signature);
+//        require(seller != address(0), "INVALID_SIGNATURE");
+        address seller = msg.sender;
 
         require(request[borrower].fee != 0, "INVALID_REQUEST");
-        require(request[borrower].fulfilledAt == 0, "ALREADY_FULFILLEd");
+        require(request[borrower].fulfilledAt == 0, "ALREADY_FULFILLED");
 
         request[borrower].seller = seller;
         request[borrower].fulfilledAt = block.timestamp;
         request[borrower].encryptedAuth = encryptedAuth;
+
         filledRequest[seller] = borrower;
+
+        _openRequests.remove(borrower);
 
         emit FulfilledRentRequest(borrower, seller);
     }
@@ -151,6 +155,8 @@ contract KeyStream is Ownable, ReentrancyGuard {
         request[borrower].seller = address(0);
         request[borrower].fulfilledAt = 0;
         request[borrower].encryptedAuth = "";
+
+        _openRequests.add(borrower);
     }
 
     function openRentRequest(uint fee, bytes memory pubkey) public nonReentrant {
@@ -163,13 +169,16 @@ contract KeyStream is Ownable, ReentrancyGuard {
 
     function _closeRentRequest(address borrower) internal {
         address seller = request[borrower].seller;
-        filledRequest[seller] = address(0);
 
         if (request[borrower].fulfilledAt > 0) {
             int price = int(accumulatedFees(seller));
             _balance[borrower] -= price;
             _balance[seller] += price;
+        } else {
+            _openRequests.remove(borrower);
         }
+
+        filledRequest[seller] = address(0);
 
         request[borrower].borrower = address(0);
         request[borrower].fee = 0;
