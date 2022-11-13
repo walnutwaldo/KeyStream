@@ -23,7 +23,7 @@ export default function CreditsDisplay() {
 
     function addBalance() {
         contract.deposit().send({
-            value: new BigNumber(500)
+            callValue: TronWeb.toSun(500)
         }).then((result: any) => {
 
         });
@@ -36,7 +36,7 @@ export default function CreditsDisplay() {
                     BALANCE TO USE
                 </h2>
                 <span className={"font-mono text-gray-700"}>
-                    Balance: {credits.toString()} TRX
+                    Balance: {TronWeb.fromSun(credits.toString()).toString()} TRX
                 </span>
                 <div className={"grid grid-cols-2 gap-2 my-2"}>
                     <CustomButton onClick={addBalance} disabled={balance.lt(
