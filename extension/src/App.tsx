@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import './App.css';
-import TronLinkConnect from './tron-auth';
+import TronLinkConnect from './TronLinkConnect';
+import {CustomButton} from "./components/CustomButton";
 
 const cookieTargets = [
     'memclid',
@@ -10,17 +11,6 @@ const cookieTargets = [
     'NetflixId',
     'OptanonConsent'
 ]
-
-function CustomButton(props: any) {
-    return (
-        <button onClick={props.onClick} className={
-            props.className +
-            " bg-gray-300 px-2 py-1 text-black rounded-md font-bold text-sm hover:bg-gray-400 transition"
-        }>
-            {props.children}
-        </button>
-    )
-}
 
 export default function App() {
     const [message, setMessage] = useState<string>('');
