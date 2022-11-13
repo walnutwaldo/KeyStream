@@ -180,6 +180,57 @@
           "type": "uint256"
         }
       ],
+      "name": "getOpenRequest",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "fee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "borrower",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "pubkey",
+              "type": "bytes"
+            },
+            {
+              "internalType": "address",
+              "name": "seller",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fulfilledAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "encryptedAuth",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct KeyStream.Request",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
+      ],
       "name": "getRequest",
       "outputs": [
         {
@@ -384,5 +435,5 @@
       "type": "function"
     }
   ],
-  "address": "419975daec423202c3fb9b5200a27c92ae8b1f2c74"
+  "address": "419190f7585b7b2d1d2cd0d1708aed7ac9da482a53"
 }

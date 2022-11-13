@@ -7,14 +7,16 @@ export type TronLinkContext = {
     tronWeb: TronWeb,
     setTronWeb: (tronWeb: TronWeb) => void,
     contract: any,
-    credits: BigNumber
+    credits: BigNumber,
+    refreshCredits: () => void,
 }
 
 const DEFAULT_CONTEXT = {
     tronWeb: null,
     setTronWeb: () => {},
     contract: null,
-    credits: new BigNumber(0)
+    credits: new BigNumber(0),
+    refreshCredits: () => {},
 }
 
 const TronLinkContext = React.createContext<TronLinkContext>(DEFAULT_CONTEXT);

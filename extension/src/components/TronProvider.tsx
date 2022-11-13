@@ -46,7 +46,8 @@ export function TronProvider(props: any) {
             tronWeb,
             setTronWeb,
             contract,
-            credits
+            credits,
+            refreshCredits
         }}>
             {props.children}
         </TronLinkContext.Provider>

@@ -90,13 +90,17 @@ contract KeyStream is Ownable, ReentrancyGuard {
         return _openRequests.length();
     }
 
-    function getRequest(uint index) public view returns (Request memory) {
+    function getRequest(address addr) public view returns (Request memory) {
+        return request[addr];
+    }
+
+    function getOpenRequest(uint index) public view returns (Request memory) {
         require(index < _openRequests.length(), "INDEX_NOT_IN_RANGE");
-        return request[_openRequests.at(index)];
+        return getRequest(_openRequests.at(index));
     }
 
     function nextOpenRequest() public view returns (Request memory) {
-        return getRequest(0);
+        return getOpenRequest(0);
     }
 
     function isAvailable(address seller) public view returns (bool) {
