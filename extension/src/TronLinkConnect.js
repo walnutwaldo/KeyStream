@@ -4,6 +4,13 @@ import {CustomButton} from "./components/CustomButton";
 
 const TronWeb = require('tronweb');
 
+function getTronWeb() {
+    const fullNode = "https://api.shasta.trongrid.io"
+    const solidityNode = "https://api.shasta.trongrid.io";
+    const eventServer = "https://api.shasta.trongrid.io";
+
+    return new TronWeb(fullNode, solidityNode, eventServer, process.env.REACT_APP_SECRET_KEY);
+}
 
 export default function TronLinkConnect() {
     //const express = require('express')
@@ -19,21 +26,19 @@ export default function TronLinkConnect() {
     //     res.render("Index");
     // });
 
-    const fullNode = "https://api.shasta.trongrid.io"
-    const solidityNode = "https://api.shasta.trongrid.io";
-    const eventServer = "https://api.shasta.trongrid.io";
-
     const [tronWeb, setTronWeb] = useState(window.tronWeb);
     const [tronWebLoaded, setTronWebLoaded] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => {
+            const tw = getTronWeb();
+
             if (
-                window.tronWeb &&
-                typeof window.tronWeb.defaultAddress.base58 == 'string' &&
+                tw &&
+                typeof tw.defaultAddress.base58 == 'string' &&
                 !tronWebLoaded
             ) {
-                setTronWeb(window.tronWeb);
+                setTronWeb(tw);
                 setTronWebLoaded(true);
             }
         }, 100);
@@ -63,7 +68,7 @@ export default function TronLinkConnect() {
 
     return tronWeb ? (
         <div className={"text-sm"}>
-            Connected to {tronWeb.defaultAddress.base58.toString()}
+            <span className={"font-semibold"}>Connected</span> ({tronWeb.defaultAddress.base58.toString()})
         </div>
     ) : (
         <div>

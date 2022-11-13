@@ -9,20 +9,8 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "borrower",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "seller",
         "type": "address"
       }
     ],
@@ -33,40 +21,6 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "seller",
-        "type": "address"
-      }
-    ],
-    "name": "DisabledRenting",
-    "type": "event",
-    "stateMutability": "nonpayable"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "seller",
-        "type": "address"
-      }
-    ],
-    "name": "EnabledRenting",
-    "type": "event",
-    "stateMutability": "nonpayable"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      },
       {
         "indexed": true,
         "internalType": "address",
@@ -89,21 +43,15 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "borrower",
         "type": "address"
       },
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "seller",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
       }
     ],
     "name": "OpenedRentRequest",
@@ -127,32 +75,6 @@
       }
     ],
     "name": "OwnershipTransferred",
-    "type": "event",
-    "stateMutability": "nonpayable"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "seller",
-        "type": "address"
-      }
-    ],
-    "name": "RejectedRentRequest",
     "type": "event",
     "stateMutability": "nonpayable"
   },
@@ -184,32 +106,6 @@
   },
   {
     "inputs": [],
-    "name": "disableRent",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "fee",
-        "type": "uint256"
-      }
-    ],
-    "name": "enableRent",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "reqId",
-        "type": "uint256"
-      }
-    ],
     "name": "endRent",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -228,9 +124,9 @@
         "type": "bytes"
       },
       {
-        "internalType": "uint256",
-        "name": "reqId",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "borrower",
+        "type": "address"
       },
       {
         "internalType": "bytes",
@@ -238,28 +134,9 @@
         "type": "bytes"
       }
     ],
-    "name": "fulfillRentRequest",
+    "name": "fulfillRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "index",
-        "type": "uint256"
-      }
-    ],
-    "name": "getAvailableToRent",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -276,6 +153,25 @@
         "internalType": "bytes",
         "name": "",
         "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRequest",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -302,7 +198,7 @@
   },
   {
     "inputs": [],
-    "name": "nextAvailableToRent",
+    "name": "nextOpenRequest",
     "outputs": [
       {
         "internalType": "address",
@@ -315,7 +211,7 @@
   },
   {
     "inputs": [],
-    "name": "numAvailableToRent",
+    "name": "numOpenRequests",
     "outputs": [
       {
         "internalType": "uint256",
@@ -329,9 +225,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "seller",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
       },
       {
         "internalType": "bytes",
@@ -340,13 +236,7 @@
       }
     ],
     "name": "openRentRequest",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -361,29 +251,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "hash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes",
-        "name": "signature",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reqId",
-        "type": "uint256"
-      }
-    ],
-    "name": "rejectRentRequest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
