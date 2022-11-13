@@ -194,4 +194,10 @@ contract KeyStream is Ownable, ReentrancyGuard {
         return request[borrower].encryptedAuth;
     }
 
+    function hasOpenRequest(
+        address borrower
+    ) public view returns (bool) {
+        return request[borrower].fee != 0;
+    }
+
 }

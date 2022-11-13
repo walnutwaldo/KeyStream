@@ -1,0 +1,3 @@
+[submodule "tronweb-wyan"]
+	path = tronweb-wyan
+	url = git@github.com:walnutwaldo/tronweb-wyan.git
