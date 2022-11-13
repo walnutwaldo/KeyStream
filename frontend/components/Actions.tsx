@@ -14,14 +14,11 @@ const Actions = () => {
 
     return userType == UserType.BUYER ? (
         <div>
-            <Deposit />
-            <Withdraw />
             <Request />
         </div>
 
     ) : (
         <div>
-            <Withdraw />
             <Fulfill />
         </div>
 

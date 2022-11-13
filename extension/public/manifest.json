@@ -7,9 +7,9 @@
     "default_popup": "index.html",
     "default_title": "Netflix Auth",
     "default_icon": {
-      "16": "favicon.ico",
-      "48": "favicon.ico",
-      "128": "favicon.ico"
+      "16": "KeyStream.png",
+      "48": "KeyStream.png",
+      "128": "KeyStream.png"
     }
   },
   "permissions": ["cookies"],

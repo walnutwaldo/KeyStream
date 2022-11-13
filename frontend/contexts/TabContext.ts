@@ -1,8 +1,8 @@
 import { createContext } from "react";
 
 export enum UserType {
-    BUYER,
-    SELLER
+    BUYER = "Borrow a login",
+    SELLER = "Rent out my login"
 }
 
 export type TabContext = {

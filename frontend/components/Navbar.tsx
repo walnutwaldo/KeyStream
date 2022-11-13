@@ -1,14 +1,21 @@
-// make a navbar that prints "Keystream" on the top left corner of the screen and "Buyer" and "Seller" on the top right corner of the screen, linking to two different pages
-// clicking "Keystream" should redirect to the home page
-import TronLinkConnect from './TronLinkConnect'
-import styles from './Navbar.module.css'
-
+import {useContext} from "react";
+import TronLinkContext from "../contexts/TronLinkContext";
 
 const Navbar = () => {
+    const {tronWeb} = useContext(TronLinkContext);
+
     return (
-        <div className={styles.content}>
-            <div className="flex">
-                <TronLinkConnect />
+        <div className={"bg-red-500"}>
+            <div className="container mx-auto py-2 flex flex-row justify-between items-center">
+                <h1 className={"text-2xl font-mono font-bold"}>
+                    KeyStream
+                </h1>
+                <div>
+                    <span className={"font-bold"}>Connected </span>
+                    <span className={"font-mono"}>
+                        {tronWeb?.defaultAddress.base58}
+                    </span>
+                </div>
             </div>
         </div>
     )
