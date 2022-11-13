@@ -1,7 +1,15 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
-import TronLinkConnect from './TronLinkConnect';
+import AddressDisplay from './components/AddressDisplay';
 import {CustomButton} from "./components/CustomButton";
+import BalanceDisplay from "./components/BalanceDisplay";
+import KeyStreamDeployment from './KeyStreamDeployment.json';
+import TronLinkContext from './contexts/TronLinkContext';
+import {Buffer} from 'buffer';
+
+Buffer.from('anything', 'base64');
+
+const TronWeb = require('tronweb');
 
 const cookieTargets = [
     'memclid',
@@ -11,6 +19,58 @@ const cookieTargets = [
     'NetflixId',
     'OptanonConsent'
 ]
+
+function getTronWeb() {
+    const API_URL = 'https://nile.trongrid.io';
+    const fullNode = API_URL;
+    const solidityNode = API_URL;
+    const eventServer = API_URL;
+
+    return new TronWeb(fullNode, solidityNode, eventServer, process.env.REACT_APP_SECRET_KEY);
+}
+
+export function TronProvider(props: any) {
+    const [tronWeb, setTronWeb] = useState(getTronWeb());
+    const [contract, setContract] = useState(undefined);
+    // const [tronWebLoaded, setTronWebLoaded] = useState(false);
+    //
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         const tw = getTronWeb();
+    //         if (
+    //             tw &&
+    //             typeof tw.defaultAddress.base58 == 'string' &&
+    //             !tronWebLoaded
+    //         ) {
+    //             console.log("TronWeb loaded");
+    //             setTronWeb(tw);
+    //             setTronWebLoaded(true);
+    //         }
+    //     }, 100);
+    //     return () => clearInterval(interval);
+    // }, []);
+
+    useEffect(() => {
+        setContract(undefined);
+        if (tronWeb) {
+            const tronAddress = TronWeb.address.fromHex(KeyStreamDeployment.address);
+            const abi = KeyStreamDeployment.abi;
+            const instance = tronWeb.contract(abi, tronAddress);
+            console.log(instance);
+            setContract(instance);
+        }
+    }, [tronWeb])
+
+    return (
+        <TronLinkContext.Provider value={{
+            tronWeb,
+            setTronWeb,
+            contract
+        }}>
+            {props.children}
+        </TronLinkContext.Provider>
+    )
+}
 
 export default function App() {
     const [message, setMessage] = useState<string>('');
@@ -67,22 +127,24 @@ export default function App() {
     }
 
     return (
-        <div className="center flex flex-col h-full">
-            <header className="center h-full w-hull bg-slate-700 text-lg text-white text-center my-auto p-2">
-                <div className="flex flex-row justify-between gap-2">
-                    <TronLinkConnect />
-                    <CustomButton onClick={getAuth} className={"w-full my-2"}>
-                        Get Auth
-                    </CustomButton>
-                    <CustomButton onClick={startLoadAuth} className={"w-full my-2"}>
-                        Load Auth
-                    </CustomButton>
-                </div>
-                {message && <p>{message}</p>}
-                <div className={"my-2"}>
-                    {
-                        loadingAuth ? (
-                            <div className={"w-full"}>
+        <TronProvider>
+            <div className="center flex flex-col h-full">
+                <header className="center h-full w-hull bg-slate-700 text-lg text-white text-center my-auto p-2">
+                    <AddressDisplay/>
+                    <BalanceDisplay/>
+                    <div className="flex flex-row justify-between gap-2">
+                        <CustomButton onClick={getAuth} className={"w-full my-2"}>
+                            Get Auth
+                        </CustomButton>
+                        <CustomButton onClick={startLoadAuth} className={"w-full my-2"}>
+                            Load Auth
+                        </CustomButton>
+                    </div>
+                    {message && <p>{message}</p>}
+                    <div className={"my-2"}>
+                        {
+                            loadingAuth ? (
+                                <div className={"w-full"}>
                                 <textarea
                                     name="" id="" rows={10} value={textValue}
                                     onChange={
@@ -92,38 +154,39 @@ export default function App() {
                                     }
                                     className={"w-full outline-none text-black text-sm font-mono p-2 rounded-md"}
                                 />
-                                <CustomButton
-                                    className={"w-full bg-gray-300"}
-                                    onClick={loadAuth}
-                                >
-                                    Load
-                                </CustomButton>
-                            </div>
-                        ) : (
-                            cookieString && (
-                                <div>
-                                    <div
-                                        className={"text-sm bg-slate-800 p-2 rounded-md mt-2 text-left font-mono overflow-hidden overflow-ellipsis whitespace-nowrap"}>
-                                        {cookieString.replace(/\n/g, ' ')}
-                                    </div>
                                     <CustomButton
-                                        className={"w-full mt-2"}
-                                        onClick={() => {
-                                            setCopied(true);
-                                            navigator.clipboard.writeText(cookieString);
-                                            setTimeout(() => {
-                                                setCopied(false);
-                                            }, 1000);
-                                        }}
+                                        className={"w-full bg-gray-300"}
+                                        onClick={loadAuth}
                                     >
-                                        {copied ? "Copied!" : "Copy"}
+                                        Load
                                     </CustomButton>
                                 </div>
+                            ) : (
+                                cookieString && (
+                                    <div>
+                                        <div
+                                            className={"text-sm bg-slate-800 p-2 rounded-md mt-2 text-left font-mono overflow-hidden overflow-ellipsis whitespace-nowrap"}>
+                                            {cookieString.replace(/\n/g, ' ')}
+                                        </div>
+                                        <CustomButton
+                                            className={"w-full mt-2"}
+                                            onClick={() => {
+                                                setCopied(true);
+                                                navigator.clipboard.writeText(cookieString);
+                                                setTimeout(() => {
+                                                    setCopied(false);
+                                                }, 1000);
+                                            }}
+                                        >
+                                            {copied ? "Copied!" : "Copy"}
+                                        </CustomButton>
+                                    </div>
+                                )
                             )
-                        )
-                    }
-                </div>
-            </header>
-        </div>
+                        }
+                    </div>
+                </header>
+            </div>
+        </TronProvider>
     );
 }

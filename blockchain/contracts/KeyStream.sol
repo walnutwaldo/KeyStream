@@ -9,14 +9,10 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract KeyStream is Ownable, ReentrancyGuard {
 
-    event EnabledRenting(address indexed seller);
-    event DisabledRenting(address indexed seller);
+    event OpenedRentRequest(address indexed borrower, uint fee);
+    event ClosedRentRequest(address indexed borrower);
 
-    event OpenedRentRequest(uint indexed requestId, address indexed borrower, address indexed seller);
-    event ClosedRentRequest(uint indexed requestId, address indexed borrower, address indexed seller);
-
-    event FulfilledRentRequest(uint indexed requestId, address indexed borrower, address indexed seller);
-    event RejectedRentRequest(uint indexed requestId, address indexed borrower, address indexed seller);
+    event FulfilledRentRequest(address indexed borrower, address indexed seller);
 
     using EnumerableSet for EnumerableSet.AddressSet;
     using ECDSA for bytes32;
@@ -25,22 +21,21 @@ contract KeyStream is Ownable, ReentrancyGuard {
 
     mapping(address => int) private _balance;
 
-    mapping(address => uint256) private rentFee;
-    EnumerableSet.AddressSet private _available;
-
-    uint numRequests = 1; // Start at 1 so that 0 can represent the NULL request
+    EnumerableSet.AddressSet private _openRequests;
 
     struct Request {
-        uint requestId;
-        address seller;
+        // Set by the borrower
+        uint fee;
+        address borrower;
         bytes pubkey;
+        // Set by the seller
+        address seller;
         uint fulfilledAt;
         bytes encryptedAuth;
     }
 
-    mapping(address => Request) private openRequest;
-    mapping(uint => address) private ownerOfRequest;
-    mapping(address => uint) private filledRequest;
+    mapping(address => Request) private request;
+    mapping(address => address) private filledRequest;
 
     constructor() {}
 
@@ -49,23 +44,25 @@ contract KeyStream is Ownable, ReentrancyGuard {
     // ---------------------
 
     function accumulatedFees(address seller) internal view returns (uint) {
-        uint sellerFee = rentFee[seller];
-        address borrower = ownerOfRequest[filledRequest[seller]];
-        uint dt = block.timestamp - openRequest[borrower].fulfilledAt;
+        address borrower = filledRequest[seller];
+        uint fee = request[filledRequest[seller]].fee;
+        require(fee != 0, "INVALID_BORROWER");
+
+        uint dt = block.timestamp - request[borrower].fulfilledAt;
         dt = dt < 3600 ? 3600 : dt;
         // Minimum 1 hour
 
-        uint price = dt * sellerFee * (1 trx) / (3600 * FEE_BASE);
+        uint price = dt * fee * (1 trx) / (3600 * FEE_BASE);
         return price;
     }
 
     function availableBalance(address user) public view returns (uint) {
         int balance = int(_balance[user]);
-        if (openRequest[user].requestId != 0) {
-            uint sellerFee = rentFee[openRequest[user].seller];
-            balance -= int(24 * (1 trx) * sellerFee / FEE_BASE);
+        if (request[user].fee != 0) {
+            uint fee = request[user].fee;
+            balance -= int(24 * (1 trx) * fee / FEE_BASE);
         }
-        if (filledRequest[user] != 0) {
+        if (filledRequest[user] != address(0)) {
             int accumFees = int(accumulatedFees(user));
             balance += accumFees;
         }
@@ -85,180 +82,116 @@ contract KeyStream is Ownable, ReentrancyGuard {
     }
 
     // ----------------------------------------
-    //       FINDING AVAILABLE TO RENT
+    //       FINDING OPEN REQUESTS
     // ----------------------------------------
 
-    function numAvailableToRent() public view returns (uint) {
-        return _available.length();
+    function numOpenRequests() public view returns (uint) {
+        return _openRequests.length();
     }
 
-    function getAvailableToRent(uint index) public view returns (address) {
-        require(index < _available.length(), "INDEX_NOT_IN_RANGE");
-        return _available.at(index);
+    function getRequest(uint index) public view returns (address) {
+        require(index < _openRequests.length(), "INDEX_NOT_IN_RANGE");
+        return _openRequests.at(index);
     }
 
-    function nextAvailableToRent() public view returns (address) {
-        return getAvailableToRent(0);
+    function nextOpenRequest() public view returns (address) {
+        return getRequest(0);
     }
 
     function isAvailable(address seller) public view returns (bool) {
-        if (rentFee[seller] == 0) return false;
-        if (_available.contains(seller)) return true;
-        if (filledRequest[seller] == 0) return false;
-        address borrower = ownerOfRequest[filledRequest[seller]];
-        if (openRequest[borrower].fulfilledAt + 24 * 60 * 60 < block.timestamp) return true;
+        address borrower = filledRequest[seller];
+        if (borrower == address(0)) return true;
+        if (request[borrower].fulfilledAt + 24 * 60 * 60 < block.timestamp) return true;
         return false;
-    }
-
-    // ----------------------------------------
-    //       SELLER FUNCTIONALITY
-    // ----------------------------------------
-
-    // Marks a user as offering their login
-    function enableRent(uint256 fee) public nonReentrant {
-        address seller = msg.sender;
-        require(fee != 0, "REQUIRES_NONZERO_FEE");
-        require(rentFee[seller] != fee, "ALREADY_ENABLED");
-        rentFee[seller] = fee;
-
-        _available.add(seller);
-
-        emit EnabledRenting(seller);
-    }
-
-    // Marks a user as no longer offering their login
-    function disableRent() public nonReentrant {
-        address seller = msg.sender;
-
-        require(rentFee[seller] == 0, "ALREADY_DISABLED");
-        require(isAvailable(seller), "AUTH_IN_USE");
-
-        rentFee[seller] = 0;
-        _available.remove(seller);
-
-        emit DisabledRenting(seller);
     }
 
     // ----------------------------------------
     //       SELLER SERVER FUNCTIONALITY
     // ----------------------------------------
 
-    function rejectRentRequest(
+    function fulfillRequest(
         bytes32 hash, // Signature hash from the seller (used in place of msg.sender to allow a server to fulfill requests)
         bytes memory signature, // Signature
-        uint reqId
-    ) public nonReentrant {
-        address seller = hash.toEthSignedMessageHash().recover(signature);
-        require(seller != address(0), "INVALID_SIGNATURE");
-
-        require(reqId < numRequests, "INVALID_REQUEST_ID");
-        address borrower = ownerOfRequest[reqId];
-        require(openRequest[borrower].requestId == reqId, "REQUEST_NOT_ACTIVE");
-        require(openRequest[borrower].seller == seller, "NOT_CORRECT_SELLER");
-
-        _closeRentRequest(reqId);
-        emit RejectedRentRequest(reqId, borrower, seller);
-    }
-
-    function fulfillRentRequest(
-        bytes32 hash, // Signature hash from the seller (used in place of msg.sender to allow a server to fulfill requests)
-        bytes memory signature, // Signature
-        uint reqId,
+        address borrower,
         bytes memory encryptedAuth
     ) public nonReentrant {
         address seller = hash.toEthSignedMessageHash().recover(signature);
         require(seller != address(0), "INVALID_SIGNATURE");
 
-        require(reqId < numRequests, "INVALID_REQUEST_ID");
-        address borrower = ownerOfRequest[reqId];
-        require(openRequest[borrower].requestId == reqId, "REQUEST_NOT_ACTIVE");
-        require(openRequest[borrower].seller == seller, "NOT_CORRECT_SELLER");
-        require(openRequest[borrower].fulfilledAt == 0, "ALREADY_FULFILLEd");
+        require(request[borrower].fee != 0, "INVALID_REQUEST");
+        require(request[borrower].fulfilledAt == 0, "ALREADY_FULFILLEd");
 
-        openRequest[borrower].fulfilledAt = block.timestamp;
-        openRequest[borrower].encryptedAuth = encryptedAuth;
-        filledRequest[seller] = reqId;
+        request[borrower].seller = seller;
+        request[borrower].fulfilledAt = block.timestamp;
+        request[borrower].encryptedAuth = encryptedAuth;
+        filledRequest[seller] = borrower;
 
-        emit FulfilledRentRequest(reqId, borrower, seller);
+        emit FulfilledRentRequest(borrower, seller);
     }
 
     // ----------------------------------------
     //       BUYER FUNCTIONALITY
     // ----------------------------------------
 
-    function _openRentRequest(address seller, bytes memory pubkey) internal returns (uint) {
-        require(rentFee[seller] != 0, "NOT_A_SELLER");
-        require(isAvailable(seller), "ALREADY_RENTED");
-
-        uint sellerFee = rentFee[seller];
-        uint minBalance = sellerFee * 24 * (1 trx) / FEE_BASE;
+    function _openRentRequest(uint fee, bytes memory pubkey) internal {
+        uint minBalance = fee * 24 * (1 trx) / FEE_BASE;
         address borrower = msg.sender;
         require(availableBalance(borrower) >= minBalance, "INSUFFICIENT_BALANCE");
 
-        uint reqId = numRequests++;
+        request[borrower].fee = fee;
+        request[borrower].borrower = borrower;
+        request[borrower].pubkey = pubkey;
 
-        openRequest[borrower].requestId = reqId;
-        openRequest[borrower].seller = seller;
-        openRequest[borrower].pubkey = pubkey;
-        openRequest[borrower].fulfilledAt = 0;
-        openRequest[borrower].encryptedAuth = "";
-
-        ownerOfRequest[reqId] = borrower;
-
-        _available.remove(seller);
-        return reqId;
+        // ZERO OUT
+        request[borrower].seller = address(0);
+        request[borrower].fulfilledAt = 0;
+        request[borrower].encryptedAuth = "";
     }
 
-    function openRentRequest(address seller, bytes memory pubkey) public nonReentrant returns (uint) {
-        require(openRequest[msg.sender].seller == address(0), "EXISTING_OPEN_REQUEST");
+    function openRentRequest(uint fee, bytes memory pubkey) public nonReentrant {
+        require(request[msg.sender].seller == address(0), "EXISTING_OPEN_REQUEST");
 
-        uint reqId = _openRentRequest(seller, pubkey);
+        _openRentRequest(fee, pubkey);
 
-        emit OpenedRentRequest(reqId, msg.sender, seller);
-        return reqId;
+        emit OpenedRentRequest(msg.sender, fee);
     }
 
-    function _closeRentRequest(uint reqId) internal {
-        address borrower = ownerOfRequest[reqId];
+    function _closeRentRequest(address borrower) internal {
+        address seller = request[borrower].seller;
+        filledRequest[seller] = address(0);
 
-        address seller = openRequest[borrower].seller;
-        _available.add(seller);
-        filledRequest[seller] = 0;
-
-        if (openRequest[borrower].fulfilledAt > 0) {
+        if (request[borrower].fulfilledAt > 0) {
             int price = int(accumulatedFees(seller));
             _balance[borrower] -= price;
             _balance[seller] += price;
         }
 
-        openRequest[borrower].requestId = 0;
-        openRequest[borrower].seller = address(0);
-        openRequest[borrower].pubkey = "";
-        openRequest[borrower].fulfilledAt = 0;
-        openRequest[borrower].encryptedAuth = "";
+        request[borrower].borrower = address(0);
+        request[borrower].fee = 0;
+        request[borrower].pubkey = "";
+
+        request[borrower].seller = address(0);
+        request[borrower].fulfilledAt = 0;
+        request[borrower].encryptedAuth = "";
     }
 
-    function endRent(uint reqId) public nonReentrant {
-        require(reqId < numRequests, "INVALID_REQUEST_ID");
-        require(ownerOfRequest[reqId] == msg.sender, "NOT_OWNER_OF_REQUEST");
+    function endRent() public nonReentrant {
+        require(request[msg.sender].fee != 0, "REQUEST_NOT_ACTIVE");
 
-        require(openRequest[msg.sender].requestId == reqId, "REQUEST_NOT_ACTIVE");
-        address seller = openRequest[msg.sender].seller;
+        _closeRentRequest(msg.sender);
 
-        _closeRentRequest(reqId);
-
-        emit ClosedRentRequest(reqId, msg.sender, seller);
+        emit ClosedRentRequest(msg.sender);
     }
 
     function getEncryptedAuth(
         address borrower
     ) public view returns (bytes memory) {
-        require(openRequest[borrower].requestId != 0, "NO_OPEN_REQUESTS");
+        require(request[borrower].fee == 0, "NO_OPEN_REQUESTS");
         if (
-            openRequest[borrower].fulfilledAt == 0 ||
-            block.timestamp > openRequest[borrower].fulfilledAt + 24 * 60 * 60
+            request[borrower].fulfilledAt == 0 ||
+            block.timestamp > request[borrower].fulfilledAt + 24 * 60 * 60
         ) return "";
-        return openRequest[borrower].encryptedAuth;
+        return request[borrower].encryptedAuth;
     }
 
 }
