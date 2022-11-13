@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Welcome from '../components/Welcome';
 import Navbar from '../components/Navbar'
-const Home: NextPage = () => {
+const Buyer: NextPage = () => {
   return (
       <h1 className="welcome">
         <Navbar />
@@ -10,4 +10,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home
+export default Buyer

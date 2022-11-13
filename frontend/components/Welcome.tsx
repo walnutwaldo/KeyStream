@@ -6,9 +6,6 @@ const Welcome = () => {
             <div className={styles.multicolortext}>
             <h1>Welcome to Keystream</h1>
             </div>               
-            <div className = {styles.info}>
-                <h1>Click Either Buyer or Seller on the Navbar to Begin</h1>
-            </div>
         </div>
     )
 }

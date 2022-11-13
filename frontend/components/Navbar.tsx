@@ -10,10 +10,6 @@ const Navbar = () => {
             <div className="flex">
                 <TronLinkConnect />
             </div>
-            <div>
-                <div className={styles.buyer}>Buyer</div>
-                <div className={styles.seller}>Seller</div>
-            </div>
         </div>
     )
 }
