@@ -16,7 +16,7 @@ const Home: NextPage = () => {
         <div>
             <Head>
                 <link rel="shortcut icon" href="../static/KeyStream.png"/>
-                <title>KeyShare Dashboard</title>
+                <title>KeyStream Dashboard</title>
             </Head>
             <TabContext.Provider value={{
                 userType,
